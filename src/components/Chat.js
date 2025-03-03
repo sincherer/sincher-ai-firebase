@@ -14,17 +14,16 @@ const Chat = () => {
     sessionStorage.setItem('chatSessionId', newId);
     return newId;
   });
-
+  const [animatingText, setAnimatingText] = useState('');
+  const [isAnimating, setIsAnimating] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
-
   useEffect(() => {
     fetchMessages();
     fetchProfileData();
   }, []);
-
   const fetchProfileData = async () => {
     try {
       const profileRef = doc(db, 'sincherData', 'profile');
@@ -36,13 +35,10 @@ const Chat = () => {
       console.error('Error fetching profile:', error);
     }
   };
-
   const generateAIResponse = async (userMessage) => {
     const message = userMessage.toLowerCase();
     let response = '';
-    
     const isEnglishQuery = /^[a-zA-Z\s?!.,]+$/.test(message);
-    
     if (profileData) {
       if (message.includes('介绍') || message.includes('你是谁') || 
           message.includes('who are you') || message.includes('what is your name') || 
@@ -73,14 +69,12 @@ const Chat = () => {
     }
     return response;
   };
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
   
     setLoading(true);
     try {
-      // 保存用户消息
       const userMessageDoc = await addDoc(collection(db, 'messages'), {
         text: newMessage,
         timestamp: new Date(),
@@ -88,7 +82,6 @@ const Chat = () => {
         sessionId: sessionId
       });
   
-      // 立即更新界面显示用户消息
       setMessages(prev => [...prev, {
         id: userMessageDoc.id,
         text: newMessage,
@@ -96,19 +89,27 @@ const Chat = () => {
         sender: 'user',
         sessionId: sessionId
       }]);
-
-      // 生成 AI 响应
+  
       const aiResponse = await generateAIResponse(newMessage);
       
-      // 保存 AI 响应
       const aiMessageDoc = await addDoc(collection(db, 'messages'), {
         text: aiResponse,
         timestamp: new Date(),
         sender: 'ai',
         sessionId: sessionId
       });
-
-      // 立即更新界面显示 AI 响应
+  
+      // 开始动画
+      setIsAnimating(true);
+      setAnimatingText('');
+      
+      // 逐字显示文本
+      for (let i = 0; i < aiResponse.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 30));
+        setAnimatingText(aiResponse.substring(0, i + 1));
+      }
+      
+      setIsAnimating(false);
       setMessages(prev => [...prev, {
         id: aiMessageDoc.id,
         text: aiResponse,
@@ -124,45 +125,7 @@ const Chat = () => {
       setLoading(false);
     }
   };
-
-  const handleClearChat = async () => {
-    try {
-      setLoading(true);
-      const q = query(
-        collection(db, 'messages'),
-        where('sessionId', '==', sessionId)
-      );
-      const querySnapshot = await getDocs(q);
-      const deletePromises = querySnapshot.docs.map(doc => 
-        deleteDoc(doc.ref)
-      );
-      await Promise.all(deletePromises);
-      setMessages([]);
-    } catch (error) {
-      console.error('Error clearing messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const q = query(
-        collection(db, 'messages'), 
-        where('sessionId', '==', sessionId),
-        orderBy('timestamp', 'asc')
-      );
-      const querySnapshot = await getDocs(q);
-      const fetchedMessages = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setMessages(fetchedMessages);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
+  // 修改消息渲染部分
   return (
     <Box sx={{ width: '100%', maxWidth: '800px', height: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Paper sx={{ 
@@ -202,7 +165,7 @@ const Chat = () => {
             color: 'rgba(0, 0, 0, 0.5)',
             textAlign: 'center'
           }}>
-            <Typography>
+              <Typography>
               Hi! I'm an AI assistant who can answer questions about my owner.<br />
               Feel free to ask me anything!
             </Typography>
@@ -230,7 +193,9 @@ const Chat = () => {
                   : '0 4px 15px rgba(0, 0, 0, 0.05)'
               }}>
                 <Typography sx={{ whiteSpace: 'pre-line' }}>
-                  {message.text}
+                  {index === messages.length - 1 && message.sender === 'ai' && isAnimating 
+                    ? animatingText
+                    : message.text}
                 </Typography>
               </Box>
             </Box>
