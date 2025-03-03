@@ -63,7 +63,7 @@ const Chat = () => {
           : `目前，我的主人${profileData.basics.name}在${latestJob.company}担任${latestJob.position}职位。他主要负责${latestJob.description}`;
       } else {
         response = isEnglishQuery
-          ? `I'm an AI assistant who can answer questions about ${profileData.basics.name}. You can ask me about:\n1. "Tell me about him"\n2. "What are his skills?"\n3. "What's his work experience?"`
+          ? `I'm an AI assistant who can answer questions about ${profileData.basics.name}. You can ask me about:\n1. "Tell me about her"\n2. "What are her skills?"\n3. "What's her work experience?"`
           : `你好！我是${profileData.basics.name}的AI助理，很高兴为你服务！\n\n你可以问我这些问题：\n1. "能介绍一下你的主人吗？"\n2. "他有什么专业技能？"\n3. "说说他的工作经历"`;
       }
     } else {
@@ -203,8 +203,8 @@ const Chat = () => {
             textAlign: 'center'
           }}>
             <Typography>
-              你好！我是一个AI助手，可以回答关于我主人的问题。<br />
-              随便问我什么吧！
+              Hi! I'm an AI assistant who can answer questions about my owner.<br />
+              Feel free to ask me anything!
             </Typography>
           </Box>
         ) : (
@@ -245,7 +245,7 @@ const Chat = () => {
           fullWidth
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="问点什么..."
+          placeholder="Ask me something..."
           disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -278,7 +278,7 @@ const Chat = () => {
             }
           }}
         >
-          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : '发送'}
+          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Send'}
         </Button>
       </Box>
     </Box>
