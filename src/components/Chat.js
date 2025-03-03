@@ -80,24 +80,44 @@ const Chat = () => {
   
     setLoading(true);
     try {
-      await addDoc(collection(db, 'messages'), {
+      // 保存用户消息
+      const userMessageDoc = await addDoc(collection(db, 'messages'), {
         text: newMessage,
         timestamp: new Date(),
         sender: 'user',
         sessionId: sessionId
       });
   
+      // 立即更新界面显示用户消息
+      setMessages(prev => [...prev, {
+        id: userMessageDoc.id,
+        text: newMessage,
+        timestamp: new Date(),
+        sender: 'user',
+        sessionId: sessionId
+      }]);
+
+      // 生成 AI 响应
       const aiResponse = await generateAIResponse(newMessage);
       
-      await addDoc(collection(db, 'messages'), {
+      // 保存 AI 响应
+      const aiMessageDoc = await addDoc(collection(db, 'messages'), {
         text: aiResponse,
         timestamp: new Date(),
         sender: 'ai',
         sessionId: sessionId
       });
+
+      // 立即更新界面显示 AI 响应
+      setMessages(prev => [...prev, {
+        id: aiMessageDoc.id,
+        text: aiResponse,
+        timestamp: new Date(),
+        sender: 'ai',
+        sessionId: sessionId
+      }]);
   
       setNewMessage('');
-      fetchMessages();
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
