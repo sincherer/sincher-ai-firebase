@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/sincher-ai-firebase/static/css/main.4df827c1.css",
-    "main.js": "/sincher-ai-firebase/static/js/main.f6678ed7.js",
+    "main.js": "/sincher-ai-firebase/static/js/main.28eb0041.js",
     "index.html": "/sincher-ai-firebase/index.html",
     "main.4df827c1.css.map": "/sincher-ai-firebase/static/css/main.4df827c1.css.map",
-    "main.f6678ed7.js.map": "/sincher-ai-firebase/static/js/main.f6678ed7.js.map"
+    "main.28eb0041.js.map": "/sincher-ai-firebase/static/js/main.28eb0041.js.map"
   },
   "entrypoints": [
     "static/css/main.4df827c1.css",
-    "static/js/main.f6678ed7.js"
+    "static/js/main.28eb0041.js"
   ]
 }
