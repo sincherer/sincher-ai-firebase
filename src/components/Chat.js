@@ -111,18 +111,18 @@ const Chat = () => {
         : '抱歉，我正在加载主人的资料，请稍后再试...';
     }
     if (message.includes('介绍') || message.includes('你是谁') || 
-        message.includes('who are you') || message.includes('what is your name') || 
+        message.includes('who are you') || message.includes('什么名字') || 
         message.includes('hi') || message.includes('hello') || 
         message.includes('name') || message.includes('叫什么')) {
       response = isEnglishQuery 
-        ? `Hi! I'm ${profileData.basics.name}'s AI assistant. ${profileData.basics.name} is a ${profileData.basics.title}. ${profileData.basics.summary}`
-        : `你好！我叫小助手，是${profileData.basics.name}的AI助理。我的主人${profileData.basics.name}是一位资深的${profileData.basics.title}。${profileData.basics.summary}`;
+        ? `Hey there! 👋 I'm ${profileData.basics.name}'s personal AI buddy! My job is to tell you all about this amazing ${profileData.basics.title}. ${profileData.basics.summary}`
+        : `嗨！高兴见到你！😊 我是${profileData.basics.name}的AI小助手，可以和你聊聊我的主人哦！他是一位超棒的${profileData.basics.title}呢。${profileData.basics.summary}`;
     } 
     else if (message.includes('技能') || message.includes('专长') || 
              message.includes('skill') || message.includes('what can you do')) {
       response = isEnglishQuery
-        ? `${profileData.basics.name}'s skills include: ${profileData.skills.join(', ')}`
-        : `我的主人${profileData.basics.name}精通以下技能：${profileData.skills.join('、')}`;
+        ? `Let me tell you about ${profileData.basics.name}'s superpowers! 🚀 Here's what they're great at: ${profileData.skills.join(', ')}`
+        : `让我来告诉你我家主人的特长吧！✨ 他超擅长这些呢：${profileData.skills.join('、')}`;
     } 
     else if (message.includes('工作') || message.includes('经历') || message.includes('经验') ||
              message.includes('work') || message.includes('experience') || message.includes('job')) {
@@ -231,37 +231,52 @@ const Chat = () => {
     else if (message.includes('certification') || message.includes('certificate') || 
              message.includes('证书') || message.includes('认证')) {
       const certList = profileData.certifications
-        .map(cert => `${cert.name} (${cert.date})\n   • Issued by: ${cert.issuer}\n   • [View Certificate](${cert.url})`);
+        .map(cert => `${cert.name} (${cert.date})\n   • ${cert.issuerLogo ? `![${cert.issuer}](${cert.issuerLogo}) ` : ''}${cert.issuer}\n   • [View Certificate](${cert.url})`);
       
       response = isEnglishQuery
-        ? `${profileData.basics.name}'s recent certifications:\n\n${certList.map((cert, i) => `${i + 1}. ${cert}`).join('\n\n')}`
-        : `${profileData.basics.name}最近获得的专业认证：\n\n${certList.map((cert, i) => `${i + 1}. ${cert}`).join('\n\n')}`;
+        ? `🏆 ${profileData.basics.name}'s recent certifications:\n\n${certList.map((cert, i) => `${i + 1}. ${cert}`).join('\n\n')}`
+        : `🏆 ${profileData.basics.name}最近获得的专业认证：\n\n${certList.map((cert, i) => `${i + 1}. ${cert}`).join('\n\n')}`;
+    }
+    else if (message.includes('contact') || message.includes('联系') || 
+             message.includes('email') || message.includes('邮件')) {
+      response = isEnglishQuery
+        ? `Would you like to connect with ${profileData.basics.name}? 📫\n\nPlease leave your contact info:\n1. Your name\n2. Email or other contact method\n3. Brief message\n\nOr you can reach out directly via:\n• Email: ${profileData.basics.email}\n• LinkedIn: ${profileData.basics.linkedin}`
+        : `想要和${profileData.basics.name}取得联系吗？📫\n\n请留下你的联系方式：\n1. 你的名字\n2. 邮箱或其他联系方式\n3. 简短留言\n\n或者直接通过以下方式联系：\n• 邮箱：${profileData.basics.email}\n• 领英：${profileData.basics.linkedin}`;
     }
     else {
       response = isEnglishQuery
-        ? `I'm an AI assistant who can answer questions about ${profileData.basics.name}. You can ask me about:\n1. "Tell me about her"\n2. "What are her skills?"\n3. "What's her work experience?"\n4. "How does she communicate with stakeholders?"\n5. "How does she handle conflicts?"\n6. "Tell me about a challenging project"\n7. "What's her leadership style?"\n8. "How does she handle pressure?"\n9. "How does she deal with failures?"\n10. "What's her educational background?"\n11. "What certifications does she have?"`
-        : `你好！我是${profileData.basics.name}的AI助理，很高兴为你服务！\n\n你可以问我这些问题：\n1. "能介绍一下你的主人吗？"\n2. "他有什么专业技能？"\n3. "说说他的工作经历"\n4. "他是如何与相关方沟通的？"\n5. "他如何处理冲突？"\n6. "讲讲他处理过的挑战性项目"\n7. "他的领导风格是怎样的？"\n8. "他如何应对压力？"\n9. "他如何处理失败？"\n10. "他的教育背景是什么？"\n11. "他获得了哪些专业认证？"`;
+        ? `Hey! 👋 I'd love to tell you more about ${profileData.basics.name}! You can ask me about:\n\n🎯 Their background and skills\n💼 Work experience\n🤝 Communication style\n👥 Leadership approach\n💪 How they handle challenges\n\nWhat would you like to know?`
+        : `你好啊！👋 我可以给你介绍${profileData.basics.name}的很多方面哦！比如：\n\n🎯 个人背景和技能\n💼 工作经历\n🤝 沟通方式\n👥 领导风格\n💪 如何应对挑战\n\n想了解哪个方面呢？`;
     }
-    
     return response;
   };
  
-  // 修复 handleSend 函数
-
-  // 优化打字机效果
-    // 合并两个 handleSend 函数
-    const handleSend = async (e) => {
-      e.preventDefault();
-      if (!newMessage.trim()) return;
-    
-      setLoading(true);
-      try {
-        const userMessageDoc = await addDoc(collection(db, 'messages'), {
-          text: newMessage,
+  // 修改 handleSend 函数
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+  
+    setLoading(true);
+    try {
+      // 检查是否包含联系信息
+      const contactInfo = newMessage.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
+      if (contactInfo) {
+        await addDoc(collection(db, 'visitors'), {
+          email: contactInfo[0],
+          message: newMessage,
           timestamp: new Date(),
-          sender: 'user',
           sessionId: sessionId
         });
+      }
+
+      const userMessageDoc = await addDoc(collection(db, 'messages'), {
+        text: newMessage,
+        timestamp: new Date(),
+        sender: 'user',
+        sessionId: sessionId
+      });
+
+
     
         setMessages(prev => [...prev, {
           id: userMessageDoc.id,
@@ -381,18 +396,35 @@ const Chat = () => {
                     '&:hover': {
                       textDecoration: 'underline'
                     }
+                  },
+                  '& img': {
+                    height: '20px',
+                    verticalAlign: 'middle',
+                    marginRight: '8px'
                   }
                 }}>
                   {message.text.split('\n').map((line, i) => {
                     const linkMatch = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
+                    const imgMatch = line.match(/!\[([^\]]+)\]\(([^)]+)\)/);
+                    
+                    if (imgMatch) {
+                      const [fullMatch, alt, src] = imgMatch;
+                      return (
+                        <React.Fragment key={i}>
+                          {line.substring(0, line.indexOf(fullMatch))}
+                          <img src={src} alt={alt} />
+                          {line.substring(line.indexOf(fullMatch) + fullMatch.length)}
+                          {i < message.text.split('\n').length - 1 && <br />}
+                        </React.Fragment>
+                      );
+                    }
+                    
                     if (linkMatch) {
                       const [fullMatch, text, url] = linkMatch;
                       return (
                         <React.Fragment key={i}>
                           {line.substring(0, line.indexOf(fullMatch))}
-                          <a href={url} target="_blank" rel="noopener noreferrer">
-                            {text}
-                          </a>
+                          <a href={url} target="_blank" rel="noopener noreferrer">{text}</a>
                           {line.substring(line.indexOf(fullMatch) + fullMatch.length)}
                           {i < message.text.split('\n').length - 1 && <br />}
                         </React.Fragment>
