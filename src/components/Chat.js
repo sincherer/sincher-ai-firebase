@@ -130,6 +130,7 @@ const Chat = () => {
   
       const aiResponse = await generateAIResponse(newMessage);
       
+      // 先添加空消息
       const aiMessageDoc = await addDoc(collection(db, 'messages'), {
         text: aiResponse,
         timestamp: new Date(),
@@ -137,24 +138,23 @@ const Chat = () => {
         sessionId: sessionId
       });
   
-      // 开始动画
-      setIsAnimating(true);
-      setAnimatingText('');
-      
-      // 逐字显示文本
-      for (let i = 0; i < aiResponse.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 30));
-        setAnimatingText(aiResponse.substring(0, i + 1));
-      }
-      
-      setIsAnimating(false);
       setMessages(prev => [...prev, {
         id: aiMessageDoc.id,
-        text: aiResponse,
+        text: '',  // 初始为空
         timestamp: new Date(),
         sender: 'ai',
         sessionId: sessionId
       }]);
+  
+      // 开始打字机效果
+      let displayText = '';
+      for (let i = 0; i < aiResponse.length; i++) {
+        displayText += aiResponse[i];
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessageDoc.id ? { ...msg, text: displayText } : msg
+        ));
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
   
       setNewMessage('');
     } catch (error) {
