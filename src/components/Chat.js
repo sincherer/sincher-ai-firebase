@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Paper, Typography, CircularProgress, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
-import { collection, addDoc, getDocs, orderBy, query, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, orderBy, query, doc, getDoc, deleteDoc, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const Chat = () => {
+  const [sessionId] = useState(() => {
+    // 获取或生成新的会话 ID
+    const existingId = sessionStorage.getItem('chatSessionId');
+    if (existingId) return existingId;
+    const newId = Math.random().toString(36).substring(2);
+    sessionStorage.setItem('chatSessionId', newId);
+    return newId;
+  });
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,7 +83,8 @@ const Chat = () => {
       await addDoc(collection(db, 'messages'), {
         text: newMessage,
         timestamp: new Date(),
-        sender: 'user'
+        sender: 'user',
+        sessionId: sessionId
       });
   
       const aiResponse = await generateAIResponse(newMessage);
@@ -82,7 +92,8 @@ const Chat = () => {
       await addDoc(collection(db, 'messages'), {
         text: aiResponse,
         timestamp: new Date(),
-        sender: 'ai'
+        sender: 'ai',
+        sessionId: sessionId
       });
   
       setNewMessage('');
@@ -94,24 +105,13 @@ const Chat = () => {
     }
   };
 
-  const fetchMessages = async () => {
-    try {
-      const q = query(collection(db, 'messages'), orderBy('timestamp', 'asc'));
-      const querySnapshot = await getDocs(q);
-      const fetchedMessages = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setMessages(fetchedMessages);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
   const handleClearChat = async () => {
     try {
       setLoading(true);
-      const q = query(collection(db, 'messages'));
+      const q = query(
+        collection(db, 'messages'),
+        where('sessionId', '==', sessionId)
+      );
       const querySnapshot = await getDocs(q);
       const deletePromises = querySnapshot.docs.map(doc => 
         deleteDoc(doc.ref)
@@ -122,6 +122,24 @@ const Chat = () => {
       console.error('Error clearing messages:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const q = query(
+        collection(db, 'messages'), 
+        where('sessionId', '==', sessionId),
+        orderBy('timestamp', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedMessages = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setMessages(fetchedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
     }
   };
 
