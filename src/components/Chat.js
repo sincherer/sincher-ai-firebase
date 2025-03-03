@@ -20,6 +20,44 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  // 把 fetchMessages 函数移到 useEffect 之前
+  const fetchMessages = async () => {
+    try {
+      const q = query(
+        collection(db, 'messages'), 
+        where('sessionId', '==', sessionId),
+        orderBy('timestamp', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedMessages = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setMessages(fetchedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+  // 把 handleClearChat 函数移到这里
+  const handleClearChat = async () => {
+    try {
+      setLoading(true);
+      const q = query(
+        collection(db, 'messages'),
+        where('sessionId', '==', sessionId)
+      );
+      const querySnapshot = await getDocs(q);
+      const deletePromises = querySnapshot.docs.map(doc => 
+        deleteDoc(doc.ref)
+      );
+      await Promise.all(deletePromises);
+      setMessages([]);
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     fetchMessages();
     fetchProfileData();
@@ -171,7 +209,8 @@ const Chat = () => {
             </Typography>
           </Box>
         ) : (
-          messages.map((message) => (
+          // 修复 messages.map 中的 index 参数
+          messages.map((message, index) => (
             <Box 
               key={message.id} 
               sx={{ 
